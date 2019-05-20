@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rbac',
+    'login',
 ]
 
 MIDDLEWARE = [
@@ -47,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'rbac.middleware.rbac.RbacMiddleware',
 ]
 
 ROOT_URLCONF = 'dPro.urls'
@@ -54,7 +57,7 @@ ROOT_URLCONF = 'dPro.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,8 +78,14 @@ WSGI_APPLICATION = 'dPro.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rbac',#os.path.join(BASE_DIR, 'db.sqlite3'),
+        'USER':'root',
+        'PASSWORD':'2358979326',
+        'HOST':'127.0.0.1',
+        'PORT':'3306'
     }
 }
 
@@ -118,3 +127,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SESSION_PERMISSION_URL_KEY = 'sky'
+SESSION_GROUP_KEY = 'blue'
+ALL_GROUP_KEY = 'k1'
+PERMISSION_GROUP_KEY = 'k2'
+
+
+LOGIN_URL = '/login/'
+REGEX_URL = r'^{url}$'
+
+SAFE_URL = [
+    r'/login/',
+    '/admin/.*',
+    '/index/',
+    '^/rbac/',
+]
