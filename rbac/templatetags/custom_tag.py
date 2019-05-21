@@ -9,16 +9,10 @@ register = template.Library()
 
 def get_structure_data(request):
     """处理菜单结构"""
-    menu = request.session[settings.SESSION_MENU_KEY]
-    all_menu = menu[settings.ALL_MENU_KEY]
-    permission_url = menu[settings.PERMISSION_MENU_KEY]
+    menu = request.session[settings.SESSION_GROUP_KEY]
+    all_menu = menu[settings.ALL_GROUP_KEY]
+    permission_url = menu[settings.PERMISSION_GROUP_KEY]
 
-    # all_menu = [
-    #     {'id': 1, 'title': '订单管理', 'parent_id': None},
-    #     {'id': 2, 'title': '库存管理', 'parent_id': None},
-    #     {'id': 3, 'title': '生产管理', 'parent_id': None},
-    #     {'id': 4, 'title': '生产调查', 'parent_id': None}
-    # ]
 
     # 定制数据结构
     all_menu_dict = {}
@@ -28,22 +22,6 @@ def get_structure_data(request):
         item['children'] = []
         all_menu_dict[item['id']] = item
 
-    # all_menu_dict = {
-    #     1: {'id': 1, 'title': '订单管理', 'parent_id': None, 'status': False, 'open': False, 'children': []},
-    #     2: {'id': 2, 'title': '库存管理', 'parent_id': None, 'status': False, 'open': False, 'children': []},
-    #     3: {'id': 3, 'title': '生产管理', 'parent_id': None, 'status': False, 'open': False, 'children': []},
-    #     4: {'id': 4, 'title': '生产调查', 'parent_id': None, 'status': False, 'open': False, 'children': []}
-    # }
-
-    # permission_url = [
-    #     {'title': '查看订单', 'url': '/order', 'menu_id': 1},
-    #     {'title': '查看库存清单', 'url': '/stock/detail', 'menu_id': 2},
-    #     {'title': '查看生产订单', 'url': '/produce/detail', 'menu_id': 3},
-    #     {'title': '产出管理', 'url': '/survey/produce', 'menu_id': 4},
-    #     {'title': '工时管理', 'url': '/survey/labor', 'menu_id': 4},
-    #     {'title': '入库', 'url': '/stock/in', 'menu_id': 2},
-    #     {'title': '排单', 'url': '/produce/new', 'menu_id': 3}
-    # ]
 
     request_rul = request.path_info
 
@@ -57,17 +35,17 @@ def get_structure_data(request):
             url['open'] = False
 
         # 将url添加到菜单下
-        all_menu_dict[url['menu_id']]["children"].append(url)
+        all_menu_dict[url['group_id']]["children"].append(url)
 
         # 显示菜单：url 的菜单及上层菜单 status: true
-        pid = url['menu_id']
+        pid = url['group_id']
         while pid:
             all_menu_dict[pid]['status'] = True
             pid = all_menu_dict[pid]['parent_id']
 
         # 展开url上层菜单：url['open'] = True, 其菜单及其父菜单open = True
         if url['open']:
-            ppid = url['menu_id']
+            ppid = url['group_id']
             while ppid:
                 all_menu_dict[ppid]['open'] = True
                 ppid = all_menu_dict[ppid]['parent_id']
@@ -97,23 +75,35 @@ def get_menu_html(menu_data):
     url_str = """
             <a href="{permission_url}" class="{active}">{permission_title}</a>
         """
+    '''
+    menu_data = [
+    {
+        'id': 1, 
+        'title': '老师', 
+        'parent_id': None, 
+        'status': True, 
+        'open': False, 
+        'children': [
+                        {
+                            'title': 'test', 
+                            'url': '/test/', 
+                            'group_id': 1, 
+                            'status': True, 
+                            'open': False
+                        }, 
+                        {
+                            'title': 'python正则表达式',
+                            'url': '/test/test/', 
+                            'group_id': 1, 
+                            'status': True, 
+                            'open': False
+                        }
+                    ]
+                }
+        ]
 
-    """
-     menu_data = [
-        {'id': 1, 'title': '订单管理', 'parent_id': None, 'status': True, 'open': False,
-         'children': [{'title': '查看订单', 'url': '/order', 'menu_id': 1, 'status': True, 'open': False}]},
-        {'id': 2, 'title': '库存管理', 'parent_id': None, 'status': True, 'open': True,
-         'children': [{'title': '查看库存清单', 'url': '/stock/detail', 'menu_id': 2, 'status': True, 'open': False},
-                      {'title': '入库', 'url': '/stock/in', 'menu_id': 2, 'status': True, 'open': True}]},
-        {'id': 3, 'title': '生产管理', 'parent_id': None, 'status': True, 'open': False,
-         'children': [{'title': '查看生产订单', 'url': '/produce/detail', 'menu_id': 3, 'status': True, 'open': False},
-                      {'title': '排单', 'url': '/produce/new', 'menu_id': 3, 'status': True, 'open': False}]},
-        {'id': 4, 'title': '生产调查', 'parent_id': None, 'status': True, 'open': False,
-         'children': [{'title': '产出管理', 'url': '/survey/produce', 'menu_id': 4, 'status': True, 'open': False},
-                      {'title': '工时管理', 'url': '/survey/labor', 'menu_id': 4, 'status': True, 'open': False}]}
-    ]
-    """
-
+[{'title': 'test', 'url': '/test/', 'group_id': 1, 'status': True, 'open': False}, {'title': 'python正则表达式', 'url': '/test/test/', 'group_id': 1, 'status': True, 'open': False}]
+    '''
     menu_html = ''
     for item in menu_data:
         if not item['status']:  # 如果用户权限不在某个菜单下，即item['status']=False, 不显示

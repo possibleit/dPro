@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^rbac/',include('rbac.urls')),
 
+    url(r'^student/',include('student.urls')),
     url(r'login/',views.login),
     url(r'index/',views.index),
 ]
