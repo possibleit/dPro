@@ -1,9 +1,9 @@
 from django.shortcuts import render,redirect
 from .forms import FileUploadForm,FileUploadModelForm
-from .models import File
+from .models import File,Student,OneClass
 from django.http import JsonResponse
 from django.template.defaultfilters import filesizeformat
-import uuid,os
+import uuid,os,xlrd
 # Create your views here.
 # Show file list
 def file_list(request):
@@ -14,16 +14,20 @@ def file_list(request):
 # Regular file upload without using ModelForm
 def file_upload(request):
     if request.method == "POST":
+        method = request.POST.get('upload_method')
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
             # get cleaned data
             upload_method = form.cleaned_data.get("upload_method")
             raw_file = form.cleaned_data.get("file")
             new_file = File()
-            new_file.file = handle_uploaded_file(raw_file)
+            new_file.file= handle_uploaded_file(raw_file,method)
+
             new_file.upload_method = upload_method
+
+
             new_file.save()
-            return redirect("/file/")
+            return redirect("/student/")
     else:
         form = FileUploadForm()
 
@@ -31,7 +35,8 @@ def file_upload(request):
                                                             'heading': 'Upload files with Regular Form'})
 
 
-def handle_uploaded_file(file):
+def handle_uploaded_file(file,method):
+    print(type(file))
     ext = file.name.split('.')[-1]
     file_name = '{}.{}'.format(uuid.uuid4().hex[:10], ext)
     # file path relative to 'media' folder
@@ -45,7 +50,31 @@ def handle_uploaded_file(file):
     with open(absolute_file_path, 'wb+') as destination:
         for chunk in file.chunks():
             destination.write(chunk)
+    data = xlrd.open_workbook(absolute_file_path)
+    table = data.sheets()[0]
+    print(data.sheet_names())
+    nrows = table.nrows
+    li = []
+    for i in range(1,nrows):
+        s = table.row_values(i, start_colx=0, end_colx=None)
+        print(s)
+        cla = OneClass.objects.get_or_create(name=s[10])[0]
+        stu = Student(
+            name=s[0],
+            sex=s[1],
+            age=s[2],
+            nativeplace=s[3],
+            unitwork=s[4],
+            business=s[5],
+            address=s[6],
+            resume=s[7],
+            email=s[8],
+            tel_number=s[9],
+            clazz=cla,
+        )
+        li.append(stu)
 
+    Student.objects.bulk_create(li)
     return file_path
 
 def model_form_upload(request):
@@ -53,7 +82,7 @@ def model_form_upload(request):
         form = FileUploadModelForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect("/file/")
+            return redirect("/student/")
     else:
         form = FileUploadModelForm()
 

@@ -5,8 +5,8 @@ import uuid,os
 # Create your models here.
 class Student(models.Model):#学生模板
     SEX = (
-        ('man' , '男'),
-        ('woman' , '女'),
+        ('男' , '男'),
+        ('女' , '女'),
     )
     name = models.CharField(max_length=20, unique=False,verbose_name='名字')
     sex = models.CharField(max_length=2,choices=SEX)
@@ -19,14 +19,18 @@ class Student(models.Model):#学生模板
     email = models.CharField(max_length=30, default='',verbose_name='邮箱')
 
     tel_number = models.IntegerField()
-
+    clazz = models.ForeignKey('OneClass',blank=True,on_delete=models.CASCADE,)
     def __unicode__(self):
+        return self.name
+    def __str__(self):
         return self.name
 
 class OneClass(models.Model):#班级模板
     name = models.CharField(max_length=50)
-    student = models.ForeignKey(Student,on_delete=models.CASCADE)
+    # student = models.ForeignKey(Student,on_delete=models.CASCADE)
     def __unicode__(self):
+        return self.name
+    def __str__(self):
         return self.name
 
 class Teacher(models.Model):#老师模板
