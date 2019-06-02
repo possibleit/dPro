@@ -24,3 +24,4 @@ urlpatterns = [
     url(r'login/',views.login),
     url(r'index/',views.index),
 ]
+#this is admin branch
