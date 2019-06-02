@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'login/',views.login),
     url(r'index/',views.index),
 ]
-#这是master分支
+#this is admin branch
+
