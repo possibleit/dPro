@@ -16,6 +16,9 @@ urlpatterns = [
     # Handling Ajax requests
     re_path(r'^ajax_upload/$', views.ajax_upload, name='ajax_upload'),
 
+    re_path(r'^export/$',views.export_preview,name = 'export'),
+
     # View File List
     path('', views.file_list, name='file_list'),
+
 ]
